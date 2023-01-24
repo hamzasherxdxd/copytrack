@@ -1,7 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import validator from "validator";
 import { regexPassword } from "../utils";
+// import { GoogleLogin } from "react-google-login";
+import Confetti from "react-confetti";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 import {
   Paper,
@@ -23,12 +31,23 @@ import {
 } from "@mui/material";
 import {
   Face as FaceIcon,
+  SettingsInputAntenna,
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
 import theme from "../styles/theme";
+import { signInGoogle } from "../api";
 
 function Login({}) {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const clientId =
+    "389927153738-9n3bpvcsb4barloiflhdec28s7o7q2mr.apps.googleusercontent.com";
+  const [getGoogleResponse, setResponse] = useState({
+    name: "",
+    email: "",
+    profile_loaded: false,
+  });
   const [values, setValues] = useState({
     email: "",
     password: "",
@@ -59,6 +78,40 @@ function Login({}) {
       showPassword: !values.showPassword,
     });
   };
+
+  async function handleGoogleLoginSuccess(tokenResponse) {
+    const accessToken = tokenResponse.access_token;
+    // dispatch(signInGoogle(accessToken, navigate));
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          googleAccessToken: accessToken,
+        }),
+      });
+      console.log(res);
+      if (!res.ok) {
+        const error = await res.json();
+        return setErrors({
+          ...errors,
+          fetchError: true,
+          fetchErrorMsg: error.msg,
+        });
+      }
+    } catch (error) {
+      setErrors({
+        ...errors,
+        fetchError: true,
+        fetchErrorMsg:
+          "There was a problem with our server, please try again later",
+      });
+    }
+  }
+
+  const login = useGoogleLogin({ onSuccess: handleGoogleLoginSuccess });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -110,6 +163,93 @@ function Login({}) {
     }
   };
 
+  const googleLogin = async (code) => {
+    console.log(code);
+    const options = {
+      url: "http://localhost:5000/api/v1/auth/google",
+      method: "POST",
+      body: JSON.stringify({ token: code }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    const tokens = await axios(options)
+      .then((response) => console.log(response.data))
+      .catch((err) => console.log(err));
+    // const tokens = await axios.post(
+    //   "http://localhost:5000/api/v1/auth/google",
+    //   { code }
+    // );
+    console.log(tokens);
+  };
+
+  const handleLogin = async (googleData) => {
+    console.log(googleData);
+    console.log(googleData.credential);
+    const options = {
+      url: "http://localhost:5000/api/v1/auth/google",
+      method: "POST",
+      body: JSON.stringify({
+        token: googleData.credential,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    axios(options)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+    // const res = await fetch ("/api/v1/auth/google", {
+    //   method: "POST",
+    //   body: JSON.stringify({
+    //     token: googleData.tokenId
+    //   }),
+    //   headers: {
+    //     "Content-Type": "application/json"
+    //   }
+    // })
+    // const data = await res.json();
+  };
+
+  // useEffect(() => {
+  //   const initClient = () => {
+  //     gapi.client.init( {
+  //       clientId: clientId,
+  //       scope: 'https://www.googleapis.com/auth/userinfo.email'
+  //     });
+  //   };
+  //   gapi.load('client:auth2', initClient);
+  // })
+
+  // const googleResponse = async (response) => {
+  //   if (response.credential) {
+  //     const googleResponse = await axios.post(
+  //       "http://localhost:5000/api/v1/user-auth",
+  //       {
+  //         token: response.credential,
+  //       }
+  //     );
+
+  //     if (Object.keys(googleResponse.data.payload).length !== 0) {
+  //       const { name, email } = googleResponse.data.payload;
+  //       setResponse({
+  //         name,
+  //         email,
+  //         profile_loaded: true,
+  //       });
+  //       toast.success("Logged In");
+  //     }
+  //   }
+  // };
+
+  const onFailure = (err) => {
+    // alert(err);
+    console.log(err);
+  };
   return (
     <>
       <Container sx={{ marginTop: "calc(100vh - 40%)" }} maxWidth="xs">
@@ -191,6 +331,21 @@ function Login({}) {
               >
                 Login
               </Button>
+              <br />
+              {/* <GoogleLogin
+                // clientId={clientId}
+                // buttonText="Login with Google"
+                // onSuccess={googleResponse}
+                // onFailure={onFailure}
+                // cookiePolicy={"single_host_origin"}
+                // onSuccess={(credentialResponse) => {
+                //   console.log(credentialResponse);
+                // }}
+                onSuccess={googleLogin}
+                onError={(err) => console.log(err)}
+                // useOneTap
+              /> */}
+              <Button onClick={() => login()}>Login with Google</Button>
             </Box>
             {errors.fetchError && (
               <FormHelperText error>{errors.fetchErrorMsg}</FormHelperText>

@@ -16,6 +16,8 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import ProjectDashboard from "./ProjectDashboard";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -24,6 +26,7 @@ const Home = () => {
   const [projectDescription, setProjectDescription] = useState("");
   const [emailNotification, setEmailNotification] = useState(false);
   const [response, setResponse] = useState("");
+  const navigate = useNavigate();
   const fetchProjects = (e) => {
     axios.get("/api/project").then((response) => {
       setProjects(response.data.projects);
@@ -71,6 +74,10 @@ const Home = () => {
     });
   };
 
+  const projectPage = (e, id) => {
+    navigate(`/project/${id}`);
+  }
+
   return (
     <Grid container spacing={2}>
       {projects.map((project) => (
@@ -85,7 +92,7 @@ const Home = () => {
               </Typography>
             </CardContent>
             <CardActions>
-              <Button variant="outlined" size="small">
+              <Button variant="outlined" size="small" onClick={(e) => projectPage(e, project.project_id)}>
                 Dashboard
               </Button>
             </CardActions>
