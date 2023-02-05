@@ -138,7 +138,7 @@ function Signup() {
     dispatch(signupGoogle(accessToken, navigate));
   }
 
-  const login = useGoogleLogin({ onSuccess: handleGoogleLoginSuccess });
+  const login = useGoogleLogin({ onSuccess: handleGoogleLoginSuccess, scope: "https://www.googleapis.com/auth/analytics.edit" });
 
   return (
     <>

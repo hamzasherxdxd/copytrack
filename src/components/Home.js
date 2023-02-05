@@ -33,6 +33,7 @@ const Home = () => {
       console.log(projects);
     });
   };
+  
   useEffect(() => {
     fetchProjects();
   }, [response]);
@@ -122,7 +123,6 @@ const Home = () => {
             onChange={(e) => handleProjectNameChange(e)}
           />
           <TextField
-            autoFocus
             margin="dense"
             id="name"
             label="Project Description"

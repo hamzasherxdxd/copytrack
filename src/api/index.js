@@ -24,6 +24,12 @@ export const signInGoogle = (accessToken) => {
   });
 };
 
+export const getGa = (accessToken) => {
+  API.get("/api/ga", {
+    googleAccessToken: accessToken,
+  });
+};
+
 export const signUp = (data) => API.post("/api/register", data);
 export const signUpGoogle = (accessToken) =>
   API.post("/api/register", {

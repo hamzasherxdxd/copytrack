@@ -78,9 +78,17 @@ function Login({}) {
       showPassword: !values.showPassword,
     });
   };
-
+  // const fetchGa = async (token) => {
+  //   console.log(token);
+  //   const res = await fetch('/api/ga', {
+  //     method: "POST",
+  //     body: JSON.stringify({googleAccessToken: token})
+  //   })
+  //   console.log(res.data)
+  // };
   async function handleGoogleLoginSuccess(tokenResponse) {
     const accessToken = tokenResponse.access_token;
+    window.localStorage.setItem("access_token", accessToken);
     // dispatch(signInGoogle(accessToken, navigate));
     try {
       const res = await fetch("/api/login", {
@@ -111,7 +119,7 @@ function Login({}) {
     }
   }
 
-  const login = useGoogleLogin({ onSuccess: handleGoogleLoginSuccess });
+  const login = useGoogleLogin({ onSuccess: handleGoogleLoginSuccess, scope: "https://www.googleapis.com/auth/analytics.edit" });
 
   const handleSubmit = async (event) => {
     event.preventDefault();

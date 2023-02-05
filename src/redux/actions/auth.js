@@ -4,7 +4,7 @@ export const loadUser = () => async (dispath) => {
   const localUser = JSON.parse(localStorage.getItem("user_info"));
 
   if (localUser) {
-    dispath({ type: "AUTH" , data: localUser });
+    dispath({ type: "AUTH", data: localUser });
   }
 };
 
@@ -22,8 +22,8 @@ export const signin = (data2, navigate) => async (dispath) => {
 export const signinGoogle = (accessToken, navigate) => async (dispatch) => {
   try {
     // login user
+    window.localStorage.setItem("access_token", accessToken);
     const { data } = await api.signInGoogle(accessToken);
-
     dispatch({ type: "AUTH", data });
     navigate("/");
   } catch (err) {
@@ -48,7 +48,7 @@ export const signupGoogle = (accessToken, navigate) => async (dispatch) => {
     // signup user
 
     const { data } = await api.signUpGoogle(accessToken);
-
+    window.localStorage.setItem("access_token", accessToken);
     dispatch({ type: "AUTH", data });
     navigate("/");
   } catch (err) {
